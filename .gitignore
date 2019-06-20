@@ -1,0 +1,6 @@
+.cproject
+.idea/
+.mxproject
+.osx.project
+.project
+cmake-build-debug/
