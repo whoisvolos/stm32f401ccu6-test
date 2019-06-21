@@ -65,6 +65,7 @@ char __io_putchar(char ch) {
 }
 
 void i2c_scan() {
+  LL_I2C
   for (uint8_t i = 0; i < 128; ++i)
   {
     I2C1->CR1 |= I2C_CR1_START;
@@ -74,9 +75,9 @@ void i2c_scan() {
     I2C1->CR1 |= I2C_CR1_STOP;
     LL_mDelay(1); // Original code 40-100 uS, here's 1 ms
     if ((I2C1->SR1 & I2C_SR1_ADDR) == 2) {
-      tiny_printf("Found I2C device at address %x (hexadecimal), or %u (decimal)\n", i, i);
+      tiny_printf("FOUND at %x\n", i);
     } else {
-      tiny_printf("No I2C device at address %x (hexadecimal), or %u (decimal)\n", i, i);
+      tiny_printf("Not found at %x\n", i);
     }
   }
 }
@@ -121,7 +122,6 @@ int main(void)
   MX_I2C1_Init();
 
   /* USER CODE BEGIN 2 */
-  LL_Init1msTick(84000000);
   tiny_printf("Hello from ITM, program started\n");
   tiny_printf("Starting I2C scanning\n");
   i2c_scan();
