@@ -53,7 +53,6 @@ static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
-static void i2c_scan();
 char __io_putchar(char ch);
 /* USER CODE END PFP */
 
@@ -64,23 +63,6 @@ char __io_putchar(char ch) {
   return ch;
 }
 
-void i2c_scan() {
-  LL_I2C
-  for (uint8_t i = 0; i < 128; ++i)
-  {
-    I2C1->CR1 |= I2C_CR1_START;
-    while(!(I2C1->SR1 & I2C_SR1_SB)); // Cut the hands off
-    I2C1->DR = (i << 1 | 0); // Cut the hands off
-    while(!(I2C1->SR1) | !(I2C1->SR2)) { }
-    I2C1->CR1 |= I2C_CR1_STOP;
-    LL_mDelay(1); // Original code 40-100 uS, here's 1 ms
-    if ((I2C1->SR1 & I2C_SR1_ADDR) == 2) {
-      tiny_printf("FOUND at %x\n", i);
-    } else {
-      tiny_printf("Not found at %x\n", i);
-    }
-  }
-}
 /* USER CODE END 0 */
 
 /**
@@ -123,9 +105,6 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   tiny_printf("Hello from ITM, program started\n");
-  tiny_printf("Starting I2C scanning\n");
-  i2c_scan();
-  tiny_printf("I2C scanning complete\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -224,7 +203,7 @@ static void MX_I2C1_Init(void)
   LL_I2C_DisableGeneralCall(I2C1);
   LL_I2C_EnableClockStretching(I2C1);
   I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
-  I2C_InitStruct.ClockSpeed = 400000;
+  I2C_InitStruct.ClockSpeed = 100000;
   I2C_InitStruct.DutyCycle = LL_I2C_DUTYCYCLE_2;
   I2C_InitStruct.OwnAddress1 = 0;
   I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;

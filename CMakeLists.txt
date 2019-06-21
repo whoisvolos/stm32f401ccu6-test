@@ -14,7 +14,7 @@ set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_OBJDUMP arm-none-eabi-objdump)
 set(SIZE arm-none-eabi-size)
 
-SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F401CCUx_FLASH.ld Src/tiny_printf.c Inc/tiny_printf.h Inc/settings.h)
+SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F401CCUx_FLASH.ld Src/tiny_printf.c Inc/tiny_printf.h Inc/settings.h Inc/ssd1306_i2c/fonts.h Src/ssd1306_i2c/fonts.c Inc/ssd1306_i2c/ssd1306.h Src/ssd1306_i2c/ssd1306.c)
 
 #Uncomment for hardware floating point
 #SET(FPU_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16")

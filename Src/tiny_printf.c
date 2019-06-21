@@ -1,5 +1,5 @@
 #include <stdarg.h>
-#include <stdint-gcc.h>
+#include <stdint.h>
 #include "tiny_printf.h"
 
 extern char __io_putchar(char ch);
