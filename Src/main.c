@@ -44,23 +44,41 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+LL_TIM_InitTypeDef TIM_InitStruct;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
+static void i2c_scan();
 char __io_putchar(char ch);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 char __io_putchar(char ch) {
   ITM_SendChar(ch);
   return ch;
+}
+
+void i2c_scan() {
+  for (uint8_t i = 0; i < 128; ++i)
+  {
+    I2C1->CR1 |= I2C_CR1_START;
+    while(!(I2C1->SR1 & I2C_SR1_SB)); // Cut the hands off
+    I2C1->DR = (i << 1 | 0); // Cut the hands off
+    while(!(I2C1->SR1) | !(I2C1->SR2)) { }
+    I2C1->CR1 |= I2C_CR1_STOP;
+    LL_mDelay(1); // Original code 40-100 uS, here's 1 ms
+    if ((I2C1->SR1 & I2C_SR1_ADDR) == 2) {
+      tiny_printf("Found I2C device at address %x (hexadecimal), or %u (decimal)\n", i, i);
+    } else {
+      tiny_printf("No I2C device at address %x (hexadecimal), or %u (decimal)\n", i, i);
+    }
+  }
 }
 /* USER CODE END 0 */
 
@@ -100,8 +118,14 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM2_Init();
-  /* USER CODE BEGIN 2 */
+  MX_I2C1_Init();
 
+  /* USER CODE BEGIN 2 */
+  LL_Init1msTick(84000000);
+  tiny_printf("Hello from ITM, program started\n");
+  tiny_printf("Starting I2C scanning\n");
+  i2c_scan();
+  tiny_printf("I2C scanning complete\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -160,20 +184,70 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  LL_I2C_InitTypeDef I2C_InitStruct = {0};
+
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+  /**I2C1 GPIO Configuration  
+  PB6   ------> I2C1_SCL
+  PB7   ------> I2C1_SDA 
+  */
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_6|LL_GPIO_PIN_7;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+  GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
+  LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  /** I2C Initialization 
+  */
+  LL_I2C_DisableOwnAddress2(I2C1);
+  LL_I2C_DisableGeneralCall(I2C1);
+  LL_I2C_EnableClockStretching(I2C1);
+  I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+  I2C_InitStruct.ClockSpeed = 400000;
+  I2C_InitStruct.DutyCycle = LL_I2C_DUTYCYCLE_2;
+  I2C_InitStruct.OwnAddress1 = 0;
+  I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+  I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+  LL_I2C_Init(I2C1, &I2C_InitStruct);
+  LL_I2C_SetOwnAddress2(I2C1, 0);
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
   */
-
-LL_TIM_InitTypeDef TIM_InitStruct;
 static void MX_TIM2_Init(void)
 {
 
   /* USER CODE BEGIN TIM2_Init 0 */
-
-  /* USER CODE END TIM2_Init 0 */
-
   memset(&TIM_InitStruct, 0, sizeof(LL_TIM_InitTypeDef));
+  /* USER CODE END TIM2_Init 0 */
 
   /* Peripheral clock enable */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
@@ -187,7 +261,7 @@ static void MX_TIM2_Init(void)
   /* USER CODE END TIM2_Init 1 */
   TIM_InitStruct.Prescaler = 41999;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 250;
+  TIM_InitStruct.Autoreload = 500;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   LL_TIM_Init(TIM2, &TIM_InitStruct);
   LL_TIM_DisableARRPreload(TIM2);
@@ -195,8 +269,10 @@ static void MX_TIM2_Init(void)
   LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
   LL_TIM_DisableMasterSlaveMode(TIM2);
   /* USER CODE BEGIN TIM2_Init 2 */
+#ifdef USE_TIM2_INTERRUPT
   LL_TIM_EnableCounter(TIM2); // Start counter
   LL_TIM_EnableIT_UPDATE(TIM2); // Enable counter overflow interrupt
+#endif
   /* USER CODE END TIM2_Init 2 */
 
 }

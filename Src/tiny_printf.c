@@ -67,7 +67,7 @@ void tiny_printf(const char* format, ...) {
           }
           xtoa((uint32_t)i, dv);
           break;
-        case 'x':                       // 32 bit heXadecimal
+        case 'x':                       // 32 bit hexadecimal
           i = va_arg(a, int);
           __io_putchar('0');
           __io_putchar('x');

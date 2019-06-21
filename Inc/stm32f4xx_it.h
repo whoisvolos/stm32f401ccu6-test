@@ -30,7 +30,7 @@
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-
+#include "tiny_printf.h"
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
@@ -38,7 +38,7 @@
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+#define __STEP 8
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

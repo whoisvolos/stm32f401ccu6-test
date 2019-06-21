@@ -4,3 +4,5 @@
 .osx.project
 .project
 cmake-build-debug/
+env/
+itm.fifo

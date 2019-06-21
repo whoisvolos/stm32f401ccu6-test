@@ -1,0 +1,34 @@
+# Flash elf file
+/usr/local/bin/openocd \
+    -c "tcl_port disabled" \
+    -s /usr/local/share/openocd/scripts \
+    -c "gdb_port 3333" \
+    -c "telnet_port 4444" \
+    -f board/stm32f401ccu6-mini.cfg \
+    -c "program \"/Users/golubevsergey/repos/embed/stm32f401ccu6-test/cmake-build-debug/stm32f401ccu6-test.elf\"" \
+    -c reset \
+    -c shutdown
+
+# For tailf itm.fifo
+/usr/local/bin/openocd \
+    -c "tcl_port disabled" \
+    -s /usr/local/share/openocd/scripts \
+    -c "gdb_port 3333" \
+    -c "telnet_port 4444" \
+    -f board/stm32f401ccu6-mini.cfg \
+    -c init \
+    -c "itm port 0 1" \
+    -c "tpiu config internal itm.fifo uart off 84000000" \
+    -c "reset run"
+
+# For swo_parser.py
+/usr/local/bin/openocd \
+    -f board/stm32f401ccu6-mini.cfg \
+    -c "tpiu config internal - uart off 84000000" \
+    -c "itm ports on"
+
+# Run writing to itm.fifo file via GDB
+target remote localhost:3333
+monitor itm port 0 1
+monitor tpiu config internal itm.fifo uart off 84000000
+continue

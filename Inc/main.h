@@ -28,6 +28,8 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f4xx.h"
+#include "stm32f4xx_ll_i2c.h"
 #include "stm32f4xx_ll_rcc.h"
 #include "stm32f4xx_ll_bus.h"
 #include "stm32f4xx_ll_system.h"
@@ -37,10 +39,7 @@ extern "C" {
 #include "stm32f4xx_ll_pwr.h"
 #include "stm32f4xx_ll_dma.h"
 #include "stm32f4xx_ll_tim.h"
-#include "stm32f4xx.h"
 #include "stm32f4xx_ll_gpio.h"
-
-#include <string.h>
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
@@ -48,9 +47,10 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include "settings.h"
 /* USER CODE END Includes */
-
+#include "tiny_printf.h"
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 

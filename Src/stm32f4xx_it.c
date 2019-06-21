@@ -21,7 +21,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_it.h"
-#include "tiny_printf.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -84,7 +83,7 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+  tiny_printf("HardFault\n");
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -99,7 +98,7 @@ void HardFault_Handler(void)
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-
+  tiny_printf("MemManageFault\n");
   /* USER CODE END MemoryManagement_IRQn 0 */
   while (1)
   {
@@ -114,7 +113,7 @@ void MemManage_Handler(void)
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
-
+  tiny_printf("BusFault\n");
   /* USER CODE END BusFault_IRQn 0 */
   while (1)
   {
@@ -201,10 +200,9 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles TIM2 global interrupt.
   */
-extern LL_TIM_InitTypeDef TIM_InitStruct;
-#define __STEP 8
 void TIM2_IRQHandler(void)
 {
+  //const static uint16_t pattern[] = [  ]
   /* USER CODE BEGIN TIM2_IRQn 0 */
   static __IO uint8_t state = 0;
   TIM2->SR &= ~TIM_SR_UIF;
@@ -216,7 +214,6 @@ void TIM2_IRQHandler(void)
   if (state == __STEP) {
     TIM_InitStruct.Autoreload = 250;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
-    tiny_printf("State: %i\n", state);
   }
   if (state == __STEP * 2 - 1) {
     state = 0;
